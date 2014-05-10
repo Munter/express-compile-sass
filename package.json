@@ -1,0 +1,24 @@
+{
+  "name": "express-compile-sass",
+  "version": "0.0.0",
+  "description": "Express middleware that compiles sass to css using the locally installed node-sass",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Peter Müller <munter@fumle.dk>",
+  "license": "MIT",
+  "devDependencies": {
+    "express": "^4.1.2",
+    "mocha": "^1.18.2",
+    "node-sass": "^0.8.6",
+    "supertest": "^0.12.1"
+  },
+  "dependencies": {
+    "async": "^0.8.0",
+    "bufferjs": "^2.0.0",
+    "express-hijackresponse": "^0.1.2",
+    "http-accept": "^0.1.6",
+    "passerror": "^1.0.1"
+  }
+}
