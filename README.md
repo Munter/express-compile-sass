@@ -1,5 +1,9 @@
 Express-compile-sass
 ====================
+[![NPM version](https://badge.fury.io/js/express-compile-sass.png)](http://badge.fury.io/js/express-compile-sass)
+[![Build Status](https://travis-ci.org/Munter/express-compile-sass.png?branch=master)](https://travis-ci.org/Munter/express-compile-sass)
+[![Dependency Status](https://david-dm.org/Munter/express-compile-sass.png)](https://david-dm.org/Munter/express-compile-sass)
+
 
 Express middleware that will compile any `.scss` or `.sass` files requested with `Accept: text/css` in the response stream and deliver the resulting CSS.
 If syntax errors are encountered an error will be displayed very prominently in the browser, giving useful feedback on where to fix the problem.
