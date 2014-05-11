@@ -1,3 +1,4 @@
+/*global __dirname*/
 var express = require('express'),
     request = require('supertest'),
     compileSass = require('../lib/index'),
