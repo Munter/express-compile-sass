@@ -4,7 +4,9 @@ var express = require('express'),
     app = express(),
     root = __dirname;
 
-app.use(compileSass(root));
+app.use(compileSass(root, {
+    strictType: true
+}));
 app.use(express.static(root));
 
 describe('compile-sass', function () {
