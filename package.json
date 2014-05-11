@@ -1,6 +1,6 @@
 {
   "name": "express-compile-sass",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Express middleware that compiles sass to css using the locally installed node-sass",
   "main": "lib/index.js",
   "scripts": {
