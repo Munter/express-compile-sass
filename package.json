@@ -4,7 +4,11 @@
   "license": "MIT",
   "version": "0.1.0",
   "description": "Express middleware that compiles sass to css using the locally installed node-sass",
-  "keywords": ["express", "sass", "css"],
+  "keywords": [
+    "express",
+    "sass",
+    "css"
+  ],
   "homepage": "https://github.com/Munter/express-compile-sass",
   "bugs": "https://github.com/Munter/express-compile-sass/issues",
   "main": "lib/index.js",
@@ -20,6 +24,7 @@
   },
   "dependencies": {
     "bufferjs": "^2.0.0",
+    "csserror": "^1.0.1",
     "express-hijackresponse": "^0.1.2"
   }
 }
