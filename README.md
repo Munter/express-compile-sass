@@ -11,6 +11,8 @@ If syntax errors are encountered an error will be displayed very prominently in 
 This module requires node-sass to run, but it will only look for it when it actually encounters a file that needs to be compiled for the first time.
 This leaves the installation of the node-sass dependency up to the individual user and lets tool makers use this middleware without introducting unneeded dependencies into projects that aren't using sass. An error message will inform the user of any missing node-sass installation.
 
+Unless disabled, express-compile-sass will set up file watchers on every `.scss` file that has been compiled in the life time of the server, and update the `atime` and `mtime` of the main file that indluded the updated file. This lets you hook in file watching middlewares to notify the browser of any updates to the CSS.
+
 Middleware Usage
 ----------------
 ``` javascript
@@ -19,8 +21,10 @@ var express = require('express'),
     compileSass = require('express-compile-sass'),
     root = process.cwd();
 
-app.use(compileSass(root), {
-    strictType: false, // If true, will only compile when Accept heder includes text/css
+app.use(compileSass({
+    root: root,
+    watchFiles: true, // Watches sass files and updates mtime on main files for each change
+    strictType: false, // If true, will only compile when Accept header includes text/css
     logToConsole: false // If true, will log to console.error on errors
 });
 app.use(express.static(root));
