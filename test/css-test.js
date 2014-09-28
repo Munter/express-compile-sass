@@ -37,7 +37,7 @@ describe('compile-sass', function () {
             .expect('body h1 {\n  color: red; }\n', done);
     });
 
-    it('should serve an error stylesheet when the SCSS ha a syntax error', function (done) {
+    it('should serve an error stylesheet when the SCSS has a syntax error', function (done) {
         request(app)
             .get('/scss/syntaxerror.scss')
             .set('Accept', 'text/css')
