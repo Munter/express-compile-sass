@@ -42,7 +42,7 @@ describe('compile-sass', function () {
             .get('/scss/syntaxerror.scss')
             .set('Accept', 'text/css')
             .expect(200)
-            .expect('Content-Type', 'text/css; charset=UTF-8')
+            .expect('Content-Type', 'text/css; charset=utf-8')
             .expect(function (res) {
                 return res.text.indexOf('syntaxerror') === -1;
             })
