@@ -21,7 +21,7 @@
     "travis": "npm run lint && mocha"
   },
   "devDependencies": {
-    "express": "^4.9.5",
+    "express": "^4.10.1",
     "jshint": "^2.5.6",
     "mocha": "^1.21.4",
     "node-sass": "^0.9.4",
