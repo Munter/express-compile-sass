@@ -6,8 +6,7 @@ var express = require('express'),
     root = __dirname;
 
 app.use(compileSass({
-    root: root,
-    strictType: true
+    root: root
 }));
 app.use(express.static(root));
 
@@ -20,18 +19,9 @@ describe('compile-sass', function () {
             .expect('body{color:red;}\n', done);
     });
 
-    it('should serve SCSS unchanged', function (done) {
+    it('should serve SCSS compiled', function (done) {
         request(app)
             .get('/scss/a.scss')
-            .expect(200)
-            .expect('Content-Type', 'application/octet-stream')
-            .expect('body{h1{color:red;}}\n', done);
-    });
-
-    it('should serve SCSS compiled when content-type is text/css', function (done) {
-        request(app)
-            .get('/scss/a.scss')
-            .set('Accept', 'text/css')
             .expect(200)
             .expect('Content-Type', 'text/css; charset=UTF-8')
             .expect('body h1 {\n  color: red; }\n', done);
@@ -40,12 +30,35 @@ describe('compile-sass', function () {
     it('should serve an error stylesheet when the SCSS has a syntax error', function (done) {
         request(app)
             .get('/scss/syntaxerror.scss')
-            .set('Accept', 'text/css')
             .expect(200)
-            .expect('Content-Type', 'text/css; charset=utf-8')
+            .expect('Content-Type', 'text/css; charset=UTF-8')
             .expect(function (res) {
                 return res.text.indexOf('syntaxerror') === -1;
             })
             .end(done);
+    });
+
+    it('should return a 304 status code if ETag matches', function (done) {
+        request(app)
+            .get('/scss/a.scss')
+            .end(function (err, res) {
+                request(app)
+                    .get('/scss/a.scss')
+                    .set('If-None-Match', res.get('etag'))
+                    .expect(304)
+                    .end(done);
+            });
+    });
+
+    it('should return a 200 status code if ETag does not match', function (done) {
+        request(app)
+            .get('/scss/a.scss')
+            .end(function (err, res) {
+                request(app)
+                    .get('/scss/a.scss')
+                    .set('If-None-Match', res.get('etag') + 'foo')
+                    .expect(200)
+                    .end(done);
+            });
     });
 });

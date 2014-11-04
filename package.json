@@ -28,8 +28,6 @@
     "supertest": "^0.12.1"
   },
   "dependencies": {
-    "bufferjs": "^2.0.0",
-    "csserror": "^1.0.1",
-    "express-hijackresponse": "^0.1.2"
+    "csserror": "^1.0.1"
   }
 }
