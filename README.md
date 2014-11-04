@@ -40,6 +40,14 @@ Browser Usage
 <link rel="stylesheet" type="text/css" href="style/main.scss">
 ```
 
+Changelog
+---------
+
+**2.x**:
+ - Removed the strict typing and stopped looking at Accept-headers. Now matches files with extensions `.scss` and `.sass`.
+ - No longer pass the request down the chain with [express-hijackresponse](https://github.com/papandreou/express-hijackresponse). The only reason for it was possible non-filesystem proxy mappings, which would not work with the sass compilers `@import` statements anyway.
+ - Cache etag and response body to reduce sass compiling workload. File watch callbacks act as cache busters.
+
 
 License
 -------
