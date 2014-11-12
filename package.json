@@ -28,6 +28,7 @@
     "supertest": "^0.12.1"
   },
   "dependencies": {
+    "async-each": "^0.1.6",
     "csserror": "^1.0.1",
     "gaze": "^0.6.4"
   }
