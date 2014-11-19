@@ -13,7 +13,7 @@ describe('File watching', function () {
         app.use(compileSass({
             root: root,
             watchFiles: false,
-            logToConsole: true
+            logToConsole: false
         }));
 
         var start = Date.now();
@@ -32,7 +32,7 @@ describe('File watching', function () {
         app.use(compileSass({
             root: root,
             watchFiles: true,
-            logToConsole: true
+            logToConsole: false
         }));
 
         var start = Date.now();
