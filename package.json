@@ -29,7 +29,6 @@
     "unexpected": "^5.0.0-beta15"
   },
   "dependencies": {
-    "async-each": "^0.1.6",
     "chalk": "^0.5.1",
     "csserror": "^1.0.1",
     "gaze": "^0.6.4"
