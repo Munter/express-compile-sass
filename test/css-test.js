@@ -61,4 +61,21 @@ describe('compile-sass', function () {
                     .end(done);
             });
     });
+
+    it('should include source comments when sourcemap option is true', function (done) {
+        var app = express();
+
+        app.use(compileSass({
+            root: root,
+            sourcemap: true,
+            watchFiles: false,
+            logToConsole: false
+        }));
+
+        request(app)
+            .get('/scss/a.scss')
+            .expect(200)
+            .expect('Content-Type', 'text/css; charset=UTF-8')
+            .expect('/* line 1, ' + root + '/scss/a.scss */\nbody h1 {\n  color: red; }\n', done);
+    });
 });
