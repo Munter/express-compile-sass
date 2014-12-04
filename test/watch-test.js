@@ -26,7 +26,7 @@ describe('File watching', function () {
             });
     });
 
-    it('should serve files fast when not watching files', function (done) {
+    it('should serve files fast when watching files', function (done) {
         var app = express();
 
         app.use(compileSass({
