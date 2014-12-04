@@ -25,6 +25,7 @@ var express = require('express'),
 
 app.use(compileSass({
     root: root,
+    sourcemap: true, // Includes source url comments in output css
     watchFiles: true, // Watches sass files and updates mtime on main files for each change
     logToConsole: false // If true, will log to console.error on errors
 });

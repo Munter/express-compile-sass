@@ -6,7 +6,8 @@ var express = require('express'),
     root = __dirname;
 
 app.use(compileSass({
-    root: root
+    root: root,
+    sourcemap: false
 }));
 app.use(express.static(root));
 
