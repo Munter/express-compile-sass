@@ -2,7 +2,7 @@
   "name": "express-compile-sass",
   "author": "Peter Müller <munter@fumle.dk>",
   "license": "MIT",
-  "version": "2.0.4",
+  "version": "2.1.0",
   "description": "Express middleware that compiles sass to css using the locally installed node-sass",
   "keywords": [
     "express",
