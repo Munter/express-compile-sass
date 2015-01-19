@@ -72,48 +72,73 @@ describe('compile-sass', function () {
             });
     });
 
-    it('should return a 200 status code if ETag when not watching files', function (done) {
-        var app = getApp();
-
-        request(app)
-            .get('/scss/a.scss')
-            .end(function (err, res) {
-                request(app)
-                    .get('/scss/a.scss')
-                    .set('If-None-Match', res.get('etag'))
-                    .expect(200)
-                    .end(done);
+    describe('when watching files', function () {
+        it('should return a 200 status code if ETag does not match', function (done) {
+            var app = getApp({
+                watchFiles: true
             });
-    });
 
-    it('should return a 304 status code if ETag matches when watching files', function (done) {
-        var app = getApp({
-            watchFiles: true
+            request(app)
+                .get('/scss/a.scss')
+                .expect(200)
+                .end(function (err, res) {
+                    request(app)
+                        .get('/scss/a.scss')
+                        .set('If-None-Match', res.get('etag') + 'foo')
+                        .expect(200)
+                        .end(done);
+                });
         });
 
-        request(app)
-            .get('/scss/a.scss')
-            .end(function (err, res) {
-                request(app)
-                    .get('/scss/a.scss')
-                    .set('If-None-Match', res.get('etag'))
-                    .expect(304)
-                    .end(done);
+        it('should return a 304 status code if ETag matches', function (done) {
+            var app = getApp({
+                watchFiles: true
             });
+
+            request(app)
+                .get('/scss/a.scss')
+                .expect(200)
+                .end(function (err, res) {
+                    request(app)
+                        .get('/scss/a.scss')
+                        .set('If-None-Match', res.get('etag'))
+                        .expect(304)
+                        .end(done);
+                });
+        });
     });
 
-    it('should return a 200 status code if ETag does not match', function (done) {
-        var app = getApp();
+    describe('when not watching files', function () {
+        it('should return a 200 status code if ETag', function (done) {
+            var app = getApp();
 
-        request(app)
-            .get('/scss/a.scss')
-            .end(function (err, res) {
-                request(app)
-                    .get('/scss/a.scss')
-                    .set('If-None-Match', res.get('etag') + 'foo')
-                    .expect(200)
-                    .end(done);
-            });
+            request(app)
+                .get('/scss/a.scss')
+                .expect(200)
+                .end(function (err, res) {
+                    request(app)
+                        .get('/scss/a.scss')
+                        .set('If-None-Match', res.get('etag'))
+                        .expect(200)
+                        .end(done);
+                });
+        });
+
+
+        it('should recompile and return a 200 status code if ETag does not match', function (done) {
+            var app = getApp();
+
+            request(app)
+                .get('/scss/a.scss')
+                .expect(200)
+                .end(function (err, res) {
+                    request(app)
+                        .get('/scss/a.scss')
+                        .set('If-None-Match', res.get('etag') + 'foo')
+                        .expect(200)
+                        .end(done);
+                });
+        });
     });
 
     it('should not include source comments when sourcemap option is false', function (done) {
