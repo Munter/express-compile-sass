@@ -1,45 +1,96 @@
 /*global __dirname*/
-var express = require('express'),
+var _ = require('lodash'),
+    express = require('express'),
     request = require('supertest'),
     compileSass = require('../lib/index'),
-    app = express(),
+    expect = require('unexpected'),
+    sinon = require('sinon'),
     root = __dirname;
 
-app.use(compileSass({
-    root: root,
-    sourcemap: false
-}));
-app.use(express.static(root));
+expect.installPlugin(require('unexpected-sinon'));
+
+function getApp(options) {
+    var app = express();
+
+    app.use(compileSass(_.extend({
+        root: root,
+        sourcemap: false,
+        watchFiles: false,
+        logToConsole: true
+    }, options)));
+
+    app.use(express.static(root));
+
+    return app;
+}
 
 describe('compile-sass', function () {
     it('should serve CSS unchanged', function (done) {
-        request(app)
+        var stub = sinon.stub(console, 'log');
+
+        request(getApp())
             .get('/css/a.css')
             .expect('Content-Type', 'text/css; charset=UTF-8')
             .expect(200)
-            .expect('body{color:red;}\n', done);
+            .expect('body{color:red;}\n')
+            .end(function () {
+                expect(stub, 'was not called');
+                stub.restore();
+                done();
+            });
     });
 
     it('should serve SCSS compiled', function (done) {
-        request(app)
+        var stub = sinon.stub(console, 'log');
+
+        request(getApp())
             .get('/scss/a.scss')
             .expect(200)
             .expect('Content-Type', 'text/css; charset=UTF-8')
-            .expect('body h1 {\n  color: red; }\n', done);
+            .expect('body h1 {\n  color: red; }\n')
+            .end(function () {
+                expect(stub, 'was called twice');
+                stub.restore();
+                done();
+            });
     });
 
     it('should serve an error stylesheet when the SCSS has a syntax error', function (done) {
-        request(app)
+        var stub = sinon.stub(console, 'log');
+
+        request(getApp())
             .get('/scss/syntaxerror.scss')
             .expect(200)
             .expect('Content-Type', 'text/css; charset=UTF-8')
             .expect(function (res) {
                 return res.text.indexOf('syntaxerror') === -1;
             })
-            .end(done);
+            .end(function () {
+                expect(stub, 'was called twice');
+                stub.restore();
+                done();
+            });
     });
 
-    it('should return a 304 status code if ETag matches', function (done) {
+    it('should return a 200 status code if ETag when not watching files', function (done) {
+        var app = getApp();
+
+        request(app)
+            .get('/scss/a.scss')
+            .end(function (err, res) {
+                request(app)
+                    .get('/scss/a.scss')
+                    .set('If-None-Match', res.get('etag'))
+                    .expect(200)
+                    .end(done);
+            });
+    });
+
+    it('should return a 304 status code if ETag matches when watching files', function (done) {
+        var app = getApp({
+            watchFiles: true
+        });
+
         request(app)
             .get('/scss/a.scss')
             .end(function (err, res) {
@@ -52,6 +103,8 @@ describe('compile-sass', function () {
     });
 
     it('should return a 200 status code if ETag does not match', function (done) {
+        var app = getApp();
+
         request(app)
             .get('/scss/a.scss')
             .end(function (err, res) {
@@ -63,15 +116,22 @@ describe('compile-sass', function () {
             });
     });
 
-    it('should include source comments when sourcemap option is true', function (done) {
-        var app = express();
+    it('should not include source comments when sourcemap option is false', function (done) {
+        var app = getApp({
+            sourcemap: false
+        });
 
-        app.use(compileSass({
-            root: root,
-            sourcemap: true,
-            watchFiles: false,
-            logToConsole: false
-        }));
+        request(app)
+            .get('/scss/a.scss')
+            .expect(200)
+            .expect('Content-Type', 'text/css; charset=UTF-8')
+            .expect('body h1 {\n  color: red; }\n', done);
+    });
+
+    it('should include source comments when sourcemap option is true', function (done) {
+        var app = getApp({
+            sourcemap: true
+        });
 
         request(app)
             .get('/scss/a.scss')
