@@ -1,8 +1,8 @@
 Express-compile-sass
 ====================
-[![NPM version](https://badge.fury.io/js/express-compile-sass.png)](http://badge.fury.io/js/express-compile-sass)
-[![Build Status](https://travis-ci.org/Munter/express-compile-sass.png?branch=master)](https://travis-ci.org/Munter/express-compile-sass)
-[![Dependency Status](https://david-dm.org/Munter/express-compile-sass.png)](https://david-dm.org/Munter/express-compile-sass)
+[![NPM version](https://badge.fury.io/js/express-compile-sass.svg)](http://badge.fury.io/js/express-compile-sass)
+[![Build Status](https://travis-ci.org/Munter/express-compile-sass.svg?branch=master)](https://travis-ci.org/Munter/express-compile-sass)
+[![Dependency Status](https://david-dm.org/Munter/express-compile-sass.svg)](https://david-dm.org/Munter/express-compile-sass)
 
 
 Express middleware that will compile any `.scss` or `.sass` files in the response stream and deliver the resulting CSS.
