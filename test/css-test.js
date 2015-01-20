@@ -77,16 +77,32 @@ describe('compile-sass', function () {
             var app = getApp({
                 watchFiles: true
             });
+            var stub = sinon.stub(console, 'log');
 
             request(app)
                 .get('/scss/a.scss')
                 .expect(200)
                 .end(function (err, res) {
-                    request(app)
-                        .get('/scss/a.scss')
-                        .set('If-None-Match', res.get('etag') + 'foo')
-                        .expect(200)
-                        .end(done);
+                    expect(stub, 'was called times', 2);
+                    expect(stub.getCall(0), 'to match', /Compiling sass file/);
+                    expect(stub.getCall(1), 'to match', /Compile time/);
+
+                    setTimeout(function () {
+                        expect(stub, 'was called times', 3);
+                        expect(stub.getCall(2), 'to match', /Watching sass @imports/);
+
+                        request(app)
+                            .get('/scss/a.scss')
+                            .set('If-None-Match', res.get('etag') + 'foo')
+                            .expect(200)
+                            .end(function () {
+                                expect(stub, 'was called times', 4);
+                                expect(stub.getCall(3), 'to match', /Server cache hit/);
+
+                                stub.restore();
+                                done();
+                            });
+                    }, 100);
                 });
         });
 
@@ -94,56 +110,97 @@ describe('compile-sass', function () {
             var app = getApp({
                 watchFiles: true
             });
+            var stub = sinon.stub(console, 'log');
 
             request(app)
                 .get('/scss/a.scss')
                 .expect(200)
                 .end(function (err, res) {
-                    request(app)
-                        .get('/scss/a.scss')
-                        .set('If-None-Match', res.get('etag'))
-                        .expect(304)
-                        .end(done);
+                    expect(stub, 'was called times', 2);
+                    expect(stub.getCall(0), 'to match', /Compiling sass file/);
+                    expect(stub.getCall(1), 'to match', /Compile time/);
+
+                    setTimeout(function () {
+                        expect(stub, 'was called times', 3);
+                        expect(stub.getCall(2), 'to match', /Watching sass @imports/);
+
+                        request(app)
+                            .get('/scss/a.scss')
+                            .set('If-None-Match', res.get('etag'))
+                            .expect(304)
+                            .end(function () {
+                                expect(stub, 'was called times', 4);
+                                expect(stub.getCall(3), 'to match', /Browser cache hit/);
+
+                                stub.restore();
+                                done();
+                            });
+                    }, 100);
                 });
         });
     });
 
     describe('when not watching files', function () {
-        it('should return a 200 status code if ETag', function (done) {
+        it('should recompile and return a 200 status code if ETag matches', function (done) {
             var app = getApp();
+            var stub = sinon.stub(console, 'log');
 
             request(app)
                 .get('/scss/a.scss')
                 .expect(200)
                 .end(function (err, res) {
+                    expect(stub, 'was called times', 2);
+                    expect(stub.getCall(0), 'to match', /Compiling sass file/);
+                    expect(stub.getCall(1), 'to match', /Compile time/);
+
                     request(app)
                         .get('/scss/a.scss')
                         .set('If-None-Match', res.get('etag'))
                         .expect(200)
-                        .end(done);
+                        .end(function () {
+                            expect(stub, 'was called times', 4);
+                            expect(stub.getCall(2), 'to match', /Compiling sass file/);
+                            expect(stub.getCall(3), 'to match', /Compile time/);
+
+                            stub.restore();
+                            done();
+                        });
                 });
         });
 
 
         it('should recompile and return a 200 status code if ETag does not match', function (done) {
             var app = getApp();
+            var stub = sinon.stub(console, 'log');
 
             request(app)
                 .get('/scss/a.scss')
                 .expect(200)
                 .end(function (err, res) {
+                    expect(stub, 'was called times', 2);
+                    expect(stub.getCall(0), 'to match', /Compiling sass file/);
+                    expect(stub.getCall(1), 'to match', /Compile time/);
+
                     request(app)
                         .get('/scss/a.scss')
                         .set('If-None-Match', res.get('etag') + 'foo')
                         .expect(200)
-                        .end(done);
+                        .end(function () {
+                            expect(stub, 'was called times', 4);
+                            expect(stub.getCall(2), 'to match', /Compiling sass file/);
+                            expect(stub.getCall(3), 'to match', /Compile time/);
+
+                            stub.restore();
+                            done();
+                        });
                 });
         });
     });
 
     it('should not include source comments when sourcemap option is false', function (done) {
         var app = getApp({
-            sourcemap: false
+            sourcemap: false,
+            logToConsole: false
         });
 
         request(app)
@@ -155,7 +212,8 @@ describe('compile-sass', function () {
 
     it('should include source comments when sourcemap option is true', function (done) {
         var app = getApp({
-            sourcemap: true
+            sourcemap: true,
+            logToConsole: false
         });
 
         request(app)
