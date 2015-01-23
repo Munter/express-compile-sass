@@ -5,7 +5,7 @@ var _ = require('lodash'),
     compileSass = require('../lib/index'),
     expect = require('unexpected'),
     sinon = require('sinon'),
-    fs = require('fs'),
+    fs = require('fs-extra'),
     root = __dirname;
 
 expect.installPlugin(require('unexpected-sinon'));
@@ -239,6 +239,66 @@ describe('compile-sass', function () {
                                         });
                                 }, 300);
                             });
+                        }, 100);
+                    });
+            });
+
+            it('should recompile and return 200 when atomically updating a dependency', function (done) {
+                var app = getApp({
+                    watchFiles: true
+                });
+                var stub = sinon.stub(console, 'log');
+
+                request(app)
+                    .get('/singleimport/main.scss')
+                    .expect(200)
+                    .end(function (req, res) {
+                        expect(stub, 'was called times', 2);
+                        expect(stub.getCall(0), 'to match', /Compiling sass file/);
+                        expect(stub.getCall(1), 'to match', /Compile time/);
+
+                        setTimeout(function () {
+                            expect(stub, 'was called times', 3);
+                            expect(stub.getCall(2), 'to match', /Watching sass @imports/);
+
+                            stub.restore();
+                            stub = sinon.stub(console, 'log');
+
+                            fs.copySync(root + '/singleimport/import.scss', root + '/singleimport/import.scss.tmp');
+                            fs.renameSync(root + '/singleimport/import.scss.tmp', root + '/singleimport/import.scss');
+
+                            setTimeout(function () {
+                                expect(stub, 'was called');
+                                expect(stub.getCall(0).args, 'to be an array whose items satisfy', function (item, idx) {
+                                    var calls = [
+                                        /import\.scss$/,
+                                        /busting cache/,
+                                        /main\.scss$/
+                                    ];
+
+                                    expect(item, 'to match', calls[idx]);
+                                });
+
+                                stub.restore();
+                                stub = sinon.stub(console, 'log');
+
+                                // ETag and cache should now be empty
+                                request(app)
+                                    .get('/singleimport/main.scss')
+                                    .set('If-None-Match', res.get('etag'))
+                                    .expect(200)
+                                    .end(function () {
+                                        setTimeout(function () {
+                                            expect(stub, 'was called times', 3);
+                                            expect(stub.getCall(0), 'to match', /Compiling sass file/);
+                                            expect(stub.getCall(1), 'to match', /Compile time/);
+                                            expect(stub.getCall(2), 'to match', /Watching sass @imports/);
+
+                                            stub.restore();
+                                            done();
+                                        }, 100);
+                                    });
+                            }, 500);
                         }, 100);
                     });
             });
