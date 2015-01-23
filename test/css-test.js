@@ -192,6 +192,58 @@ describe('compile-sass', function () {
                     });
             });
 
+            it('should recompile and return 200 when atomically updating the main file', function (done) {
+                var app = getApp({
+                    watchFiles: true
+                });
+                var stub = sinon.stub(console, 'log');
+
+                request(app)
+                    .get('/singleimport/main.scss')
+                    .expect(200)
+                    .end(function (req, res) {
+                        expect(stub, 'was called times', 2);
+                        expect(stub.getCall(0), 'to match', /Compiling sass file/);
+                        expect(stub.getCall(1), 'to match', /Compile time/);
+
+                        setTimeout(function () {
+                            expect(stub, 'was called times', 3);
+                            expect(stub.getCall(2), 'to match', /Watching sass @imports/);
+
+                            stub.restore();
+                            stub = sinon.stub(console, 'log');
+
+                            fs.copySync(root + '/singleimport/main.scss', root + '/singleimport/main.scss.tmp');
+                            fs.renameSync(root + '/singleimport/main.scss.tmp', root + '/singleimport/main.scss');
+
+                            setTimeout(function () {
+                                expect(stub, 'was called');
+                                expect(stub.getCall(0), 'to match', /was updated, busting cache/);
+
+                                stub.restore();
+                                stub = sinon.stub(console, 'log');
+
+                                // ETag and cache should now be empty
+                                request(app)
+                                    .get('/singleimport/main.scss')
+                                    .set('If-None-Match', res.get('etag'))
+                                    .expect(200)
+                                    .end(function () {
+                                        setTimeout(function () {
+                                            expect(stub, 'was called times', 3);
+                                            expect(stub.getCall(0), 'to match', /Compiling sass file/);
+                                            expect(stub.getCall(1), 'to match', /Compile time/);
+                                            expect(stub.getCall(2), 'to match', /Watching sass @imports/);
+
+                                            stub.restore();
+                                            done();
+                                        }, 100);
+                                    });
+                            }, 300);
+                        }, 100);
+                    });
+            });
+
             it('should recompile and return 200 when updating a dependency', function (done) {
                 var app = getApp({
                     watchFiles: true
