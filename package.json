@@ -37,7 +37,7 @@
     "unexpected-sinon": "^5.0.0"
   },
   "dependencies": {
-    "chalk": "^0.5.1",
+    "chalk": "^1.0.0",
     "csserror": "^1.0.1",
     "gaze": "^0.6.4"
   }
