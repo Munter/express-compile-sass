@@ -21,7 +21,7 @@ describe('File watching', function () {
         request(app)
             .get('/manyfiles/main.scss')
             .end(function () {
-                expect(Date.now() - start, 'to be less than', 30);
+                expect(Date.now() - start, 'to be less than', 200);
                 done();
             });
     });
@@ -40,7 +40,7 @@ describe('File watching', function () {
         request(app)
             .get('/manyfiles/main.scss')
             .end(function () {
-                expect(Date.now() - start, 'to be less than', 80);
+                expect(Date.now() - start, 'to be less than', 300);
                 done();
             });
     });
