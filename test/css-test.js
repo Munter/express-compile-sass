@@ -185,13 +185,13 @@ describe('compile-sass', function () {
         });
 
         return expect(app, 'to yield exchange', {
-          request: 'GET /scss/a.scss',
+          request: 'GET /import-main/main.scss',
           response: 200
         })
         .then(wait(300)) // File watcher delay
         .then(function (context) {
           return expect.promise(function (run) {
-            fs.utimes(root + '/scss/a.scss', new Date(), new Date(), run(function () {
+            fs.utimes(root + '/import-main/main.scss', new Date(), new Date(), run(function () {
               return context;
             }));
           });
@@ -200,7 +200,7 @@ describe('compile-sass', function () {
         .then(function (context) {
           return expect(app, 'to yield exchange', {
             request: {
-              url: '/scss/a.scss',
+              url: '/import-main/main.scss',
               headers: {
                 'If-None-Match': context.res.get('etag')
               }
@@ -217,14 +217,14 @@ describe('compile-sass', function () {
         });
 
         return expect(app, 'to yield exchange', {
-          request: 'GET /singleimport/main.scss',
+          request: 'GET /import-main-atomic/main.scss',
           response: 200
         })
         .then(wait(300)) // File watcher delay
         .then(function (context) {
           return expect.promise(function (resolve, reject) {
-            fs.copySync(root + '/singleimport/main.scss', root + '/singleimport/main.scss.tmp');
-            fs.renameSync(root + '/singleimport/main.scss.tmp', root + '/singleimport/main.scss');
+            fs.copySync(root + '/import-main-atomic/main.scss', root + '/import-main-atomic/main.scss.tmp');
+            fs.renameSync(root + '/import-main-atomic/main.scss.tmp', root + '/import-main-atomic/main.scss');
 
             resolve(context);
           });
@@ -233,7 +233,7 @@ describe('compile-sass', function () {
         .then(function (context) {
           return expect(app, 'to yield exchange', {
             request: {
-              url: '/singleimport/main.scss',
+              url: '/import-main-atomic/main.scss',
               headers: {
                 'If-None-Match': context.res.get('etag')
               }
@@ -250,13 +250,13 @@ describe('compile-sass', function () {
         });
 
         return expect(app, 'to yield exchange', {
-          request: 'GET /singleimport/main.scss',
+          request: 'GET /import-import/main.scss',
           response: 200
         })
         .then(wait(300)) // File watcher delay
         .then(function (context) {
           return expect.promise(function (run) {
-            fs.utimes(root + '/scss/import.scss', new Date(), new Date(), run(function () {
+            fs.utimes(root + '/import-import/import.scss', new Date(), new Date(), run(function () {
               return context;
             }));
           });
@@ -265,7 +265,7 @@ describe('compile-sass', function () {
         .then(function (context) {
           return expect(app, 'to yield exchange', {
             request: {
-              url: '/singleimport/main.scss',
+              url: '/import-import/main.scss',
               headers: {
                 'If-None-Match': context.res.get('etag')
               }
@@ -282,14 +282,14 @@ describe('compile-sass', function () {
         });
 
         return expect(app, 'to yield exchange', {
-          request: 'GET /singleimport/main.scss',
+          request: 'GET /import-import-atomic/main.scss',
           response: 200
         })
         .then(wait(300)) // File watcher delay
         .then(function (context) {
           return expect.promise(function (resolve, reject) {
-            fs.copySync(root + '/singleimport/import.scss', root + '/singleimport/import.scss.tmp');
-            fs.renameSync(root + '/singleimport/import.scss.tmp', root + '/singleimport/import.scss');
+            fs.copySync(root + '/import-import-atomic/import.scss', root + '/import-import-atomic/import.scss.tmp');
+            fs.renameSync(root + '/import-import-atomic/import.scss.tmp', root + '/import-import-atomic/import.scss');
 
             resolve(context);
           });
@@ -298,7 +298,7 @@ describe('compile-sass', function () {
         .then(function (context) {
           return expect(app, 'to yield exchange', {
             request: {
-              url: '/singleimport/main.scss',
+              url: '/import-import-atomic/main.scss',
               headers: {
                 'If-None-Match': context.res.get('etag')
               }
