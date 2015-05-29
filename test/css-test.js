@@ -188,6 +188,7 @@ describe('compile-sass', function () {
           request: 'GET /scss/a.scss',
           response: 200
         })
+        .then(wait(300)) // File watcher delay
         .then(function (context) {
           return expect.promise(function (run) {
             fs.utimes(root + '/scss/a.scss', new Date(), new Date(), run(function () {
@@ -195,7 +196,7 @@ describe('compile-sass', function () {
             }));
           });
         })
-        .then(wait(800)) // Why is this needed? :(
+        .then(wait(300)) // File watch trigger delay
         .then(function (context) {
           return expect(app, 'to yield exchange', {
             request: {
@@ -219,6 +220,7 @@ describe('compile-sass', function () {
           request: 'GET /singleimport/main.scss',
           response: 200
         })
+        .then(wait(300)) // File watcher delay
         .then(function (context) {
           return expect.promise(function (resolve, reject) {
             fs.copySync(root + '/singleimport/main.scss', root + '/singleimport/main.scss.tmp');
@@ -227,7 +229,7 @@ describe('compile-sass', function () {
             resolve(context);
           });
         })
-        .then(wait(800)) // Why is this needed? :(
+        .then(wait(300)) // File watch trigger delay
         .then(function (context) {
           return expect(app, 'to yield exchange', {
             request: {
@@ -251,6 +253,7 @@ describe('compile-sass', function () {
           request: 'GET /singleimport/main.scss',
           response: 200
         })
+        .then(wait(300)) // File watcher delay
         .then(function (context) {
           return expect.promise(function (run) {
             fs.utimes(root + '/scss/import.scss', new Date(), new Date(), run(function () {
@@ -258,7 +261,7 @@ describe('compile-sass', function () {
             }));
           });
         })
-        .then(wait(400)) // Why is this needed? :(
+        .then(wait(300)) // File watch trigger delay
         .then(function (context) {
           return expect(app, 'to yield exchange', {
             request: {
@@ -282,6 +285,7 @@ describe('compile-sass', function () {
           request: 'GET /singleimport/main.scss',
           response: 200
         })
+        .then(wait(300)) // File watcher delay
         .then(function (context) {
           return expect.promise(function (resolve, reject) {
             fs.copySync(root + '/singleimport/import.scss', root + '/singleimport/import.scss.tmp');
@@ -290,7 +294,7 @@ describe('compile-sass', function () {
             resolve(context);
           });
         })
-        .then(wait(200)) // Why is this needed? :(
+        .then(wait(300)) // File watch trigger delay
         .then(function (context) {
           return expect(app, 'to yield exchange', {
             request: {
@@ -302,6 +306,7 @@ describe('compile-sass', function () {
             response: 200
           });
         });
+
       });
     });
   });
