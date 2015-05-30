@@ -1,21 +1,20 @@
 /*global __dirname*/
 var _ = require('lodash'),
-    express = require('express'),
-    request = require('supertest'),
-    compileSass = require('../lib/index'),
-    expect = require('unexpected'),
-    sinon = require('sinon'),
-    fs = require('fs-extra'),
-    root = __dirname;
+  express = require('express'),
+  compileSass = require('../lib/index'),
+  expect = require('unexpected'),
+  sinon = require('sinon'),
+  fs = require('fs-extra'),
+  root = __dirname;
 
 expect.installPlugin(require('unexpected-sinon'));
+expect.installPlugin(require('unexpected-express'));
 
 function getApp(options) {
     var app = express();
 
     app.use(compileSass(_.extend({
         root: root,
-        sourcemap: false,
         watchFiles: false,
         logToConsole: true
     }, options)));
@@ -25,418 +24,358 @@ function getApp(options) {
     return app;
 }
 
+function wait(ms) {
+  return function (context) {
+    return expect.promise(function (run) {
+      setTimeout(run(function () {
+        return context;
+      }), ms);
+    });
+  };
+}
+
 describe('compile-sass', function () {
-    it('should serve CSS unchanged', function (done) {
-        var stub = sinon.stub(console, 'log');
+  it('should serve CSS unchanged', function () {
+    var stub = sinon.stub(console, 'log');
 
-        request(getApp())
-            .get('/css/a.css')
-            .expect('Content-Type', 'text/css; charset=UTF-8')
-            .expect(200)
-            .expect('body{color:red;}\n')
-            .end(function () {
-                expect(stub, 'was not called');
-                stub.restore();
-                done();
-            });
+    return expect(getApp(), 'to yield exchange', {
+      request: {
+        url: '/css/a.css'
+      },
+      response: {
+        statusCode: 200,
+        headers: {
+          'Content-Type': 'text/css; charset=UTF-8'
+        },
+        body: 'body{color:red;}\n'
+      }
+    }).then(function () {
+      expect(stub, 'was not called');
+    })
+    .finally(stub.restore);
+  });
+
+  it('should serve SCSS compiled', function () {
+    var stub = sinon.stub(console, 'log');
+
+    return expect(getApp(), 'to yield exchange', {
+      request: {
+        url: '/scss/a.scss'
+      },
+      response: {
+        statusCode: 200,
+        headers: {
+          'Content-Type': 'text/css; charset=UTF-8'
+        },
+        body: /^body h1 {\n  color: red; }\n/
+      }
+    })
+    .then(function () {
+      expect(stub, 'was called twice');
+    })
+    .finally(stub.restore);
+  });
+
+  it('should serve SCSS compiled with sourcemaps', function () {
+    var stub = sinon.stub(console, 'log');
+
+    return expect(getApp({
+      sourceMap: true
+    }), 'to yield exchange', {
+      request: {
+        url: '/scss/a.scss'
+      },
+      response: {
+        statusCode: 200,
+        headers: {
+          'Content-Type': 'text/css; charset=UTF-8'
+        },
+        body: /^body h1 {\n  color: red; }\n\n\/\*# sourceMappingURL=data:application\/json;base64/
+      }
+    })
+    .then(function () {
+      expect(stub, 'was called twice');
+    })
+    .finally(stub.restore);
+  });
+
+  it('should serve an error stylesheet when the SCSS has a syntax error', function () {
+    var stub = sinon.stub(console, 'log');
+
+    return expect(getApp(), 'to yield exchange', {
+      request: {
+        url: '/scss/syntaxerror.scss'
+      },
+      response: {
+        statusCode: 200,
+        headers: {
+          'Content-Type': 'text/css; charset=UTF-8'
+        },
+        body: expect.it('to match', /content: "express-compile-sass:\\00000a  Syntax error in \/scss\/syntaxerror\.scss:2(?::10)?\\00000aproperty "color" must be followed by a \\000027:\\000027";/)
+      }
+    })
+    .then(function () {
+      expect(stub, 'was called twice');
+    })
+    .finally(stub.restore);
+  });
+
+  it('should not include source comments when sourceComments option is false', function () {
+    return expect(getApp({
+      sourceComments: false,
+      logToConsole: false
+    }), 'to yield exchange', {
+      request: {
+        url: '/scss/a.scss'
+      },
+      response: {
+        statusCode: 200,
+        headers: {
+          'Content-Type': 'text/css; charset=UTF-8'
+        },
+        body: expect.it('to match', /^body h1 {\n  color: red; }\n/)
+      }
+    });
+  });
+
+  it('should include source comments when sourceComments option is true', function () {
+    return expect(getApp({
+      sourceComments: true,
+      logToConsole: false
+    }), 'to yield exchange', {
+      request: {
+        url: '/scss/a.scss'
+      },
+      response: {
+        statusCode: 200,
+        headers: {
+          'Content-Type': 'text/css; charset=UTF-8'
+        },
+        body: expect.it('to match', /^\/\* line 1, .*?\/scss\/a\.scss \*\/\nbody h1 {\n  color: red; }\n/)
+      }
+    });
+  });
+
+  describe('when watching files', function () {
+    it('should return a 200 status code if ETag does not match', function () {
+      var app = getApp({
+        watchFiles: true,
+        logToConsole: false
+      });
+
+      return expect(app, 'to yield exchange', {
+        request: 'GET /scss/a.scss',
+        response: 200
+      })
+      .then(function () {
+        return expect(app, 'to yield exchange', {
+          request: {
+            url: '/scss/a.scss'
+          },
+          response: 200
+        });
+      });
     });
 
-    it('should serve SCSS compiled', function (done) {
-        var stub = sinon.stub(console, 'log');
+    it('should return a 304 status code if ETag matches', function () {
+      var app = getApp({
+        watchFiles: true,
+        logToConsole: false
+      });
 
-        request(getApp())
-            .get('/scss/a.scss')
-            .expect(200)
-            .expect('Content-Type', 'text/css; charset=UTF-8')
-            .expect('body h1 {\n  color: red; }\n')
-            .end(function () {
-                expect(stub, 'was called twice');
-                stub.restore();
-                done();
-            });
+      return expect(app, 'to yield exchange', {
+        request: 'GET /scss/a.scss',
+        response: 200
+      })
+      .then(function (context) {
+        return expect(app, 'to yield exchange', {
+          request: {
+            url: '/scss/a.scss',
+            headers: {
+              'If-None-Match': context.res.get('etag')
+            }
+          },
+          response: 304
+        });
+      });
     });
 
-    it('should serve an error stylesheet when the SCSS has a syntax error', function (done) {
-        var stub = sinon.stub(console, 'log');
-
-        request(getApp())
-            .get('/scss/syntaxerror.scss')
-            .expect(200)
-            .expect('Content-Type', 'text/css; charset=UTF-8')
-            .expect(function (res) {
-                return res.text.indexOf('syntaxerror') === -1;
-            })
-            .end(function () {
-                expect(stub, 'was called twice');
-                stub.restore();
-                done();
-            });
-    });
-
-    describe('when watching files', function () {
-        it('should return a 200 status code if ETag does not match', function (done) {
-            var app = getApp({
-                watchFiles: true
-            });
-            var stub = sinon.stub(console, 'log');
-
-            request(app)
-                .get('/scss/a.scss')
-                .expect(200)
-                .end(function (err, res) {
-                    expect(stub, 'was called times', 2);
-                    expect(stub.getCall(0), 'to match', /Compiling sass file/);
-                    expect(stub.getCall(1), 'to match', /Compile time/);
-
-                    setTimeout(function () {
-                        expect(stub, 'was called times', 3);
-                        expect(stub.getCall(2), 'to match', /Watching sass @imports/);
-
-                        request(app)
-                            .get('/scss/a.scss')
-                            .set('If-None-Match', res.get('etag') + 'foo')
-                            .expect(200)
-                            .end(function () {
-                                expect(stub, 'was called times', 4);
-                                expect(stub.getCall(3), 'to match', /Server cache hit/);
-
-                                stub.restore();
-                                done();
-                            });
-                    }, 100);
-                });
-        });
-
-        it('should return a 304 status code if ETag matches', function (done) {
-            var app = getApp({
-                watchFiles: true
-            });
-            var stub = sinon.stub(console, 'log');
-
-            request(app)
-                .get('/scss/a.scss')
-                .expect(200)
-                .end(function (err, res) {
-                    expect(stub, 'was called times', 2);
-                    expect(stub.getCall(0), 'to match', /Compiling sass file/);
-                    expect(stub.getCall(1), 'to match', /Compile time/);
-
-                    setTimeout(function () {
-                        expect(stub, 'was called times', 3);
-                        expect(stub.getCall(2), 'to match', /Watching sass @imports/);
-
-                        request(app)
-                            .get('/scss/a.scss')
-                            .set('If-None-Match', res.get('etag'))
-                            .expect(304)
-                            .end(function () {
-                                expect(stub, 'was called times', 4);
-                                expect(stub.getCall(3), 'to match', /Browser cache hit/);
-
-                                stub.restore();
-                                done();
-                            });
-                    }, 100);
-                });
-        });
-
-        describe('then updating a watched file', function () {
-            it('should recompile and return 200 when updating the main file', function (done) {
-                var app = getApp({
-                    watchFiles: true
-                });
-                var stub = sinon.stub(console, 'log');
-
-                request(app)
-                    .get('/scss/a.scss')
-                    .expect(200)
-                    .end(function (req, res) {
-                        expect(stub, 'was called times', 2);
-                        expect(stub.getCall(0), 'to match', /Compiling sass file/);
-                        expect(stub.getCall(1), 'to match', /Compile time/);
-
-                        setTimeout(function () {
-                            expect(stub, 'was called times', 3);
-                            expect(stub.getCall(2), 'to match', /Watching sass @imports/);
-
-                            stub.restore();
-                            stub = sinon.stub(console, 'log');
-
-                            fs.utimes(root + '/scss/a.scss', new Date(), new Date(), function () {
-                                setTimeout(function () {
-                                    expect(stub, 'was called');
-                                    expect(stub.getCall(0), 'to match', /was updated, busting cache/);
-
-                                    stub.restore();
-                                    stub = sinon.stub(console, 'log');
-
-                                    // ETag and cache should now be empty
-                                    request(app)
-                                        .get('/scss/a.scss')
-                                        .set('If-None-Match', res.get('etag'))
-                                        .expect(200)
-                                        .end(function () {
-                                            setTimeout(function () {
-                                                expect(stub, 'was called times', 3);
-                                                expect(stub.getCall(0), 'to match', /Compiling sass file/);
-                                                expect(stub.getCall(1), 'to match', /Compile time/);
-                                                expect(stub.getCall(2), 'to match', /Watching sass @imports/);
-
-                                                stub.restore();
-                                                done();
-                                            }, 100);
-                                        });
-                                }, 300);
-                            });
-                        }, 100);
-                    });
-            });
-
-            it('should recompile and return 200 when atomically updating the main file', function (done) {
-                var app = getApp({
-                    watchFiles: true
-                });
-                var stub = sinon.stub(console, 'log');
-
-                request(app)
-                    .get('/singleimport/main.scss')
-                    .expect(200)
-                    .end(function (req, res) {
-                        expect(stub, 'was called times', 2);
-                        expect(stub.getCall(0), 'to match', /Compiling sass file/);
-                        expect(stub.getCall(1), 'to match', /Compile time/);
-
-                        setTimeout(function () {
-                            expect(stub, 'was called times', 3);
-                            expect(stub.getCall(2), 'to match', /Watching sass @imports/);
-
-                            stub.restore();
-                            stub = sinon.stub(console, 'log');
-
-                            fs.copySync(root + '/singleimport/main.scss', root + '/singleimport/main.scss.tmp');
-                            fs.renameSync(root + '/singleimport/main.scss.tmp', root + '/singleimport/main.scss');
-
-                            setTimeout(function () {
-                                expect(stub, 'was called');
-                                expect(stub.getCall(0), 'to match', /was updated, busting cache/);
-
-                                stub.restore();
-                                stub = sinon.stub(console, 'log');
-
-                                // ETag and cache should now be empty
-                                request(app)
-                                    .get('/singleimport/main.scss')
-                                    .set('If-None-Match', res.get('etag'))
-                                    .expect(200)
-                                    .end(function () {
-                                        setTimeout(function () {
-                                            expect(stub, 'was called times', 3);
-                                            expect(stub.getCall(0), 'to match', /Compiling sass file/);
-                                            expect(stub.getCall(1), 'to match', /Compile time/);
-                                            expect(stub.getCall(2), 'to match', /Watching sass @imports/);
-
-                                            stub.restore();
-                                            done();
-                                        }, 100);
-                                    });
-                            }, 300);
-                        }, 100);
-                    });
-            });
-
-            it('should recompile and return 200 when updating a dependency', function (done) {
-                var app = getApp({
-                    watchFiles: true
-                });
-                var stub = sinon.stub(console, 'log');
-
-                request(app)
-                    .get('/singleimport/main.scss')
-                    .expect(200)
-                    .end(function (req, res) {
-                        expect(stub, 'was called times', 2);
-                        expect(stub.getCall(0), 'to match', /Compiling sass file/);
-                        expect(stub.getCall(1), 'to match', /Compile time/);
-
-                        setTimeout(function () {
-                            expect(stub, 'was called times', 3);
-                            expect(stub.getCall(2), 'to match', /Watching sass @imports/);
-
-                            stub.restore();
-                            stub = sinon.stub(console, 'log');
-
-                            fs.utimes(root + '/singleimport/import.scss', new Date(), new Date(), function () {
-                                setTimeout(function () {
-                                    expect(stub, 'was called');
-                                    expect(stub.getCall(0), 'to match', /was updated, busting cache/);
-
-                                    stub.restore();
-                                    stub = sinon.stub(console, 'log');
-
-                                    // ETag and cache should now be empty
-                                    request(app)
-                                        .get('/singleimport/main.scss')
-                                        .set('If-None-Match', res.get('etag'))
-                                        .expect(200)
-                                        .end(function () {
-                                            setTimeout(function () {
-                                                expect(stub, 'was called times', 3);
-                                                expect(stub.getCall(0), 'to match', /Compiling sass file/);
-                                                expect(stub.getCall(1), 'to match', /Compile time/);
-                                                expect(stub.getCall(2), 'to match', /Watching sass @imports/);
-
-                                                stub.restore();
-                                                done();
-                                            }, 100);
-                                        });
-                                }, 300);
-                            });
-                        }, 100);
-                    });
-            });
-
-            it('should recompile and return 200 when atomically updating a dependency', function (done) {
-                var app = getApp({
-                    watchFiles: true
-                });
-                var stub = sinon.stub(console, 'log');
-
-                request(app)
-                    .get('/singleimport/main.scss')
-                    .expect(200)
-                    .end(function (req, res) {
-                        expect(stub, 'was called times', 2);
-                        expect(stub.getCall(0), 'to match', /Compiling sass file/);
-                        expect(stub.getCall(1), 'to match', /Compile time/);
-
-                        setTimeout(function () {
-                            expect(stub, 'was called times', 3);
-                            expect(stub.getCall(2), 'to match', /Watching sass @imports/);
-
-                            stub.restore();
-                            stub = sinon.stub(console, 'log');
-
-                            fs.copySync(root + '/singleimport/import.scss', root + '/singleimport/import.scss.tmp');
-                            fs.renameSync(root + '/singleimport/import.scss.tmp', root + '/singleimport/import.scss');
-
-                            setTimeout(function () {
-                                expect(stub, 'was called');
-                                expect(stub.getCall(0).args, 'to be an array whose items satisfy', function (item, idx) {
-                                    var calls = [
-                                        /import\.scss$/,
-                                        /busting cache/,
-                                        /main\.scss$/
-                                    ];
-
-                                    expect(item, 'to match', calls[idx]);
-                                });
-
-                                stub.restore();
-                                stub = sinon.stub(console, 'log');
-
-                                // ETag and cache should now be empty
-                                request(app)
-                                    .get('/singleimport/main.scss')
-                                    .set('If-None-Match', res.get('etag'))
-                                    .expect(200)
-                                    .end(function () {
-                                        setTimeout(function () {
-                                            expect(stub, 'was called times', 3);
-                                            expect(stub.getCall(0), 'to match', /Compiling sass file/);
-                                            expect(stub.getCall(1), 'to match', /Compile time/);
-                                            expect(stub.getCall(2), 'to match', /Watching sass @imports/);
-
-                                            stub.restore();
-                                            done();
-                                        }, 100);
-                                    });
-                            }, 500);
-                        }, 100);
-                    });
-            });
-        });
-    });
-
-    describe('when not watching files', function () {
-        it('should recompile and return a 200 status code if ETag matches', function (done) {
-            var app = getApp();
-            var stub = sinon.stub(console, 'log');
-
-            request(app)
-                .get('/scss/a.scss')
-                .expect(200)
-                .end(function (err, res) {
-                    expect(stub, 'was called times', 2);
-                    expect(stub.getCall(0), 'to match', /Compiling sass file/);
-                    expect(stub.getCall(1), 'to match', /Compile time/);
-
-                    request(app)
-                        .get('/scss/a.scss')
-                        .set('If-None-Match', res.get('etag'))
-                        .expect(200)
-                        .end(function () {
-                            expect(stub, 'was called times', 4);
-                            expect(stub.getCall(2), 'to match', /Compiling sass file/);
-                            expect(stub.getCall(3), 'to match', /Compile time/);
-
-                            stub.restore();
-                            done();
-                        });
-                });
-        });
-
-
-        it('should recompile and return a 200 status code if ETag does not match', function (done) {
-            var app = getApp();
-            var stub = sinon.stub(console, 'log');
-
-            request(app)
-                .get('/scss/a.scss')
-                .expect(200)
-                .end(function (err, res) {
-                    expect(stub, 'was called times', 2);
-                    expect(stub.getCall(0), 'to match', /Compiling sass file/);
-                    expect(stub.getCall(1), 'to match', /Compile time/);
-
-                    request(app)
-                        .get('/scss/a.scss')
-                        .set('If-None-Match', res.get('etag') + 'foo')
-                        .expect(200)
-                        .end(function () {
-                            expect(stub, 'was called times', 4);
-                            expect(stub.getCall(2), 'to match', /Compiling sass file/);
-                            expect(stub.getCall(3), 'to match', /Compile time/);
-
-                            stub.restore();
-                            done();
-                        });
-                });
-        });
-    });
-
-    it('should not include source comments when sourcemap option is false', function (done) {
+    describe('then updating a watched file', function () {
+      it('should recompile and return 200 when updating the main file', function () {
         var app = getApp({
-            sourcemap: false,
-            logToConsole: false
+          watchFiles: true,
+          logToConsole: false
         });
 
-        request(app)
-            .get('/scss/a.scss')
-            .expect(200)
-            .expect('Content-Type', 'text/css; charset=UTF-8')
-            .expect('body h1 {\n  color: red; }\n', done);
-    });
+        return expect(app, 'to yield exchange', {
+          request: 'GET /import-main/main.scss',
+          response: 200
+        })
+        .then(wait(300)) // File watcher delay
+        .then(function (context) {
+          return expect.promise(function (run) {
+            fs.utimes(root + '/import-main/main.scss', new Date(), new Date(), run(function () {
+              return context;
+            }));
+          });
+        })
+        .then(wait(300)) // File watch trigger delay
+        .then(function (context) {
+          return expect(app, 'to yield exchange', {
+            request: {
+              url: '/import-main/main.scss',
+              headers: {
+                'If-None-Match': context.res.get('etag')
+              }
+            },
+            response: 200
+          });
+        });
+      });
 
-    it('should include source comments when sourcemap option is true', function (done) {
+      it('should recompile and return 200 when atomically updating the main file', function () {
         var app = getApp({
-            sourcemap: true,
-            logToConsole: false
+          watchFiles: true,
+          logToConsole: false
         });
 
-        request(app)
-            .get('/scss/a.scss')
-            .expect(200)
-            .expect('Content-Type', 'text/css; charset=UTF-8')
-            .expect('/* line 1, ' + root + '/scss/a.scss */\nbody h1 {\n  color: red; }\n', done);
+        return expect(app, 'to yield exchange', {
+          request: 'GET /import-main-atomic/main.scss',
+          response: 200
+        })
+        .then(wait(300)) // File watcher delay
+        .then(function (context) {
+          return expect.promise(function (resolve, reject) {
+            fs.copySync(root + '/import-main-atomic/main.scss', root + '/import-main-atomic/main.scss.tmp');
+            fs.renameSync(root + '/import-main-atomic/main.scss.tmp', root + '/import-main-atomic/main.scss');
+
+            resolve(context);
+          });
+        })
+        .then(wait(300)) // File watch trigger delay
+        .then(function (context) {
+          return expect(app, 'to yield exchange', {
+            request: {
+              url: '/import-main-atomic/main.scss',
+              headers: {
+                'If-None-Match': context.res.get('etag')
+              }
+            },
+            response: 200
+          });
+        });
+      });
+
+      it('should recompile and return 200 when updating a dependency', function () {
+        var app = getApp({
+          watchFiles: true,
+          logToConsole: false
+        });
+
+        return expect(app, 'to yield exchange', {
+          request: 'GET /import-import/main.scss',
+          response: 200
+        })
+        .then(wait(300)) // File watcher delay
+        .then(function (context) {
+          return expect.promise(function (run) {
+            fs.utimes(root + '/import-import/import.scss', new Date(), new Date(), run(function () {
+              return context;
+            }));
+          });
+        })
+        .then(wait(300)) // File watch trigger delay
+        .then(function (context) {
+          return expect(app, 'to yield exchange', {
+            request: {
+              url: '/import-import/main.scss',
+              headers: {
+                'If-None-Match': context.res.get('etag')
+              }
+            },
+            response: 200
+          });
+        });
+      });
+
+      it('should recompile and return 200 when atomically updating a dependency', function () {
+        var app = getApp({
+          watchFiles: true,
+          logToConsole: false
+        });
+
+        return expect(app, 'to yield exchange', {
+          request: 'GET /import-import-atomic/main.scss',
+          response: 200
+        })
+        .then(wait(300)) // File watcher delay
+        .then(function (context) {
+          return expect.promise(function (resolve, reject) {
+            fs.copySync(root + '/import-import-atomic/import.scss', root + '/import-import-atomic/import.scss.tmp');
+            fs.renameSync(root + '/import-import-atomic/import.scss.tmp', root + '/import-import-atomic/import.scss');
+
+            resolve(context);
+          });
+        })
+        .then(wait(300)) // File watch trigger delay
+        .then(function (context) {
+          return expect(app, 'to yield exchange', {
+            request: {
+              url: '/import-import-atomic/main.scss',
+              headers: {
+                'If-None-Match': context.res.get('etag')
+              }
+            },
+            response: 200
+          });
+        });
+
+      });
     });
+  });
+
+  describe('when not watching files', function () {
+    it('should return a 200 status code if ETag does not match', function () {
+      var app = getApp({
+        watchFiles: false,
+        logToConsole: false
+      });
+
+      return expect(app, 'to yield exchange', {
+        request: 'GET /scss/a.scss',
+        response: 200
+      })
+      .then(function () {
+        return expect(app, 'to yield exchange', {
+          request: {
+            url: '/scss/a.scss'
+          },
+          response: 200
+        });
+      });
+    });
+
+    it('should return a 200 status code if ETag matches', function () {
+      var app = getApp({
+        watchFiles: false,
+        logToConsole: false
+      });
+
+      return expect(app, 'to yield exchange', {
+        request: 'GET /scss/a.scss',
+        response: 200
+      })
+      .then(function (context) {
+        return expect(app, 'to yield exchange', {
+          request: {
+            url: '/scss/a.scss',
+            headers: {
+              'If-None-Match': context.res.get('etag')
+            }
+          },
+          response: 200
+        });
+      });
+    });
+  });
 });
