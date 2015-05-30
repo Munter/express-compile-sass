@@ -26,7 +26,8 @@ var express = require('express'),
 
 app.use(compileSass({
     root: root,
-    sourcemap: true, // Includes source url comments in output css
+    sourceMap: true, // Includes Base64 encoded source maps in output css
+    sourceComments: true, // Includes source comments in output css
     watchFiles: true, // Watches sass files and updates mtime on main files for each change
     logToConsole: false // If true, will log to console.error on errors
 });
@@ -44,6 +45,11 @@ Browser Usage
 
 Changelog
 ---------
+
+**3.x**:
+ - Switched from importing node-sass directly. Now uses [node-sass-evergreen](https://github.com/Munter/node-sass-evergreen) to have more features and better backwards compatibility with older node versions
+ - `options.sourceMap` now correctly includes source maps instead of soruce comments
+ - `options.sourceComments` now adds source comments to output
 
 **2.x**:
  - Removed the strict typing and stopped looking at Accept-headers. Now matches files with extensions `.scss` and `.sass`.
