@@ -52,7 +52,7 @@ describe('compile-sass', function () {
     }).then(function () {
       expect(stub, 'was not called');
     })
-    .then(stub.restore);
+    .finally(stub.restore);
   });
 
   it('should serve SCSS compiled', function () {
@@ -73,7 +73,7 @@ describe('compile-sass', function () {
     .then(function () {
       expect(stub, 'was called twice');
     })
-    .then(stub.restore);
+    .finally(stub.restore);
   });
 
   it('should serve an error stylesheet when the SCSS has a syntax error', function () {
@@ -94,7 +94,7 @@ describe('compile-sass', function () {
     .then(function () {
       expect(stub, 'was called twice');
     })
-    .then(stub.restore);
+    .finally(stub.restore);
   });
 
   it('should not include source comments when sourceComments option is false', function () {
