@@ -67,6 +67,29 @@ describe('compile-sass', function () {
         headers: {
           'Content-Type': 'text/css; charset=UTF-8'
         },
+        body: /^body h1 {\n  color: red; }\n/
+      }
+    })
+    .then(function () {
+      expect(stub, 'was called twice');
+    })
+    .finally(stub.restore);
+  });
+
+  it('should serve SCSS compiled with sourcemaps', function () {
+    var stub = sinon.stub(console, 'log');
+
+    return expect(getApp({
+      sourceMap: true
+    }), 'to yield exchange', {
+      request: {
+        url: '/scss/a.scss'
+      },
+      response: {
+        statusCode: 200,
+        headers: {
+          'Content-Type': 'text/css; charset=UTF-8'
+        },
         body: /^body h1 {\n  color: red; }\n\n\/\*# sourceMappingURL=data:application\/json;base64/
       }
     })
