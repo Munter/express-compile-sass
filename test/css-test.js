@@ -88,7 +88,7 @@ describe('compile-sass', function () {
         headers: {
           'Content-Type': 'text/css; charset=UTF-8'
         },
-        body: expect.it('to match', /content: "express-compile-sass:\\00000a  Syntax error in \/scss\/syntaxerror\.scss line 2:undefined\\00000aproperty "color" must be followed by a \\000027";/)
+        body: expect.it('to match', /content: "express-compile-sass:\\00000a  Syntax error in \/scss\/syntaxerror\.scss:2(?::10)?\\00000aproperty "color" must be followed by a \\000027:\\000027";/)
       }
     })
     .then(function () {
