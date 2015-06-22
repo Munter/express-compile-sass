@@ -120,6 +120,27 @@ describe('compile-sass', function () {
     .finally(stub.restore);
   });
 
+  it('should serve an error stylesheet when the SCSS has a missing import', function () {
+    var stub = sinon.stub(console, 'log');
+
+    return expect(getApp(), 'to yield exchange', {
+      request: {
+        url: '/missingimport/missingimport.scss'
+      },
+      response: {
+        statusCode: 200,
+        headers: {
+          'Content-Type': 'text/css; charset=UTF-8'
+        },
+        body: expect.it('to match', /content: "express-compile-sass:\\00000a  Syntax error in \/missingimport\/missingimport\.scss:1:9\\00000afile to import not found or unreadable: missing\.scss\\00000aCurrent dir: .*?express-compile-sass\/test\/missingimport\/"/)
+      }
+    })
+    .then(function () {
+      expect(stub, 'was called twice');
+    })
+    .finally(stub.restore);
+  });
+
   it('should not include source comments when sourceComments option is false', function () {
     return expect(getApp({
       sourceComments: false,
