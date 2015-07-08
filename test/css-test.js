@@ -111,7 +111,7 @@ describe('compile-sass', function () {
         headers: {
           'Content-Type': 'text/css; charset=UTF-8'
         },
-        body: expect.it('to match', /content: "express-compile-sass:\\00000a  Syntax error in \/scss\/syntaxerror\.scss:2(?::10)?\\00000aproperty "color" must be followed by a \\000027:\\000027";/)
+        body: expect.it('to match', /content: "express\\00002dcompile\\00002dsass:\\00000a  Syntax error in \\00002fscss\\00002fsyntaxerror\\00002escss:2(?::10)?\\00000aproperty \\000022color\\000022 must be followed by a \\000027:\\000027";/)
       }
     })
     .then(function () {
@@ -132,7 +132,7 @@ describe('compile-sass', function () {
         headers: {
           'Content-Type': 'text/css; charset=UTF-8'
         },
-        body: expect.it('to match', /content: "express-compile-sass:\\00000a  Syntax error in \/missingimport\/missingimport\.scss:1:9\\00000afile to import not found or unreadable: missing\.scss\\00000aCurrent dir: .*?express-compile-sass\/test\/missingimport\/"/)
+        body: expect.it('to match', /content: "express\\00002dcompile\\00002dsass:\\00000a  Syntax error in \\00002fmissingimport\\00002fmissingimport\\00002escss:1:9\\00000afile to import not found or unreadable: missing\\00002escss\\00000aCurrent dir: .*?express\\00002dcompile\\00002dsass\\00002ftest\\00002fmissingimport\\00002f"/)
       }
     })
     .then(function () {
