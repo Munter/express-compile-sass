@@ -43,7 +43,7 @@
   },
   "dependencies": {
     "chalk": "^1.0.0",
-    "csserror": "^1.0.1",
+    "csserror": "^1.1.2",
     "gaze": "^0.5.1",
     "inline-source-map-comment": "^1.0.5",
     "node-sass-evergreen": "^1.1.1"
