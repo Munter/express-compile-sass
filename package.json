@@ -38,7 +38,7 @@
     "mocha-lcov-reporter": "0.0.1",
     "node-sass": "^3.1.2",
     "sinon": "^1.15.4",
-    "supertest": "^0.12.1",
+    "supertest": "^1.2.0",
     "unexpected": "^9.2.1",
     "unexpected-express": "^7.3.0",
     "unexpected-messy": "^4.6.0",
