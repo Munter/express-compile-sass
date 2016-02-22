@@ -31,7 +31,7 @@
     "fs-extra": "^0.15.0",
     "istanbul": "^0.3.5",
     "jshint": "^2.5.6",
-    "lodash": "^2.4.1",
+    "lodash": "^4.5.1",
     "magicpen-media": "^1.5.0",
     "messy": "^6.5.0",
     "mocha": "^1.21.4",
