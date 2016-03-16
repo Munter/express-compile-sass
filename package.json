@@ -41,7 +41,7 @@
     "supertest": "^0.12.1",
     "unexpected": "^9.2.1",
     "unexpected-express": "^7.3.0",
-    "unexpected-messy": "^4.6.0",
+    "unexpected-messy": "^6.1.1",
     "unexpected-sinon": "^6.4.1"
   },
   "dependencies": {
