@@ -39,7 +39,7 @@
     "node-sass": "^3.1.2",
     "sinon": "^1.15.4",
     "supertest": "^0.12.1",
-    "unexpected": "^9.2.1",
+    "unexpected": "^10.10.12",
     "unexpected-express": "^7.3.0",
     "unexpected-messy": "^4.6.0",
     "unexpected-sinon": "^6.4.1"
