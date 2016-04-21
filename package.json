@@ -36,7 +36,7 @@
     "messy": "^6.5.0",
     "mocha": "^1.21.4",
     "mocha-lcov-reporter": "0.0.1",
-    "node-sass": "^3.1.2",
+    "node-sass": "^3.5.2",
     "sinon": "^1.15.4",
     "supertest": "^0.12.1",
     "unexpected": "^9.2.1",
