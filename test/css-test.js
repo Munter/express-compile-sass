@@ -10,6 +10,24 @@ var _ = require('lodash'),
 expect.installPlugin(require('unexpected-sinon'));
 expect.installPlugin(require('unexpected-express'));
 
+// Css custom assertion
+var mensch = require('mensch');
+
+function parseAndPrettyPrint(cssString) {
+    return mensch.stringify(mensch.parse(cssString), {indentation: '  '});
+}
+
+expect.addAssertion('<string> to contain the same CSS as <string>', function (expect, subject, value) {
+    expect(parseAndPrettyPrint(subject), 'to equal', parseAndPrettyPrint(value));
+});
+
+expect.addAssertion('<string> to contain an inline source map [exhaustively] satisfying <object>', function (expect, subject, value) {
+    return expect(subject, 'to match', /(?:\/\*|\/\/)# sourceMappingURL=data:application\/json;base64,([^* ]*)/).spread(function ($0, base64Str) {
+        return expect(JSON.parse(new Buffer(base64Str, 'base64').toString('utf-8')), 'to [exhaustively] satisfy', value);
+    });
+});
+
+
 function getApp(options) {
     var app = express();
 
@@ -47,7 +65,7 @@ describe('compile-sass', function () {
         headers: {
           'Content-Type': 'text/css; charset=UTF-8'
         },
-        body: 'body{color:red;}\n'
+        body: expect.it('to contain the same CSS as', 'body{ color: red;}')
       }
     }).then(function () {
       expect(stub, 'was not called');
@@ -67,7 +85,7 @@ describe('compile-sass', function () {
         headers: {
           'Content-Type': 'text/css; charset=UTF-8'
         },
-        body: /^body h1 {\n  color: red; }\n/
+        body: expect.it('to contain the same CSS as', 'body h1 { color: red; }')
       }
     })
     .then(function () {
@@ -90,7 +108,13 @@ describe('compile-sass', function () {
         headers: {
           'Content-Type': 'text/css; charset=UTF-8'
         },
-        body: /^body h1 {\n  color: red; }\n\n\/\*# sourceMappingURL=data:application\/json;base64/
+        body: expect.it('to contain the same CSS as', 'body h1 { color: red; }')
+          .and('to contain an inline source map satisfying', {
+            version: 3,
+            file: 'a.scss',
+            sources: [ 'a.scss' ],
+            names: []
+          })
       }
     })
     .then(function () {
@@ -111,7 +135,7 @@ describe('compile-sass', function () {
         headers: {
           'Content-Type': 'text/css; charset=UTF-8'
         },
-        body: expect.it('to match', /content: "express\\00002dcompile\\00002dsass:\\00000a  Syntax error in \\00002fscss\\00002fsyntaxerror\\00002escss:2(?::10)?\\00000aproperty \\000022color\\000022 must be followed by a \\000027:\\000027";/)
+        body: expect.it('to contain', 'content: "express\\2d compile\\2d sass:\\a   Syntax error in \\2f scss\\2f syntaxerror\\2e scss:2:5\\a property \\22 color\\22  must be followed by a \\27 :\\27 "')
       }
     })
     .then(function () {
@@ -132,7 +156,7 @@ describe('compile-sass', function () {
         headers: {
           'Content-Type': 'text/css; charset=UTF-8'
         },
-        body: expect.it('to match', /content: "express\\00002dcompile\\00002dsass:\\00000a  Syntax error in \\00002fmissingimport\\00002fmissingimport\\00002escss:1:9\\00000afile to import not found or unreadable: missing\\00002escss\\00000aCurrent dir: .*?express\\00002dcompile\\00002dsass\\00002ftest\\00002fmissingimport\\00002f"/)
+        body: expect.it('to contain', 'content: "express\\2d compile\\2d sass:\\a   Syntax error in \\2f missingimport\\2f missingimport\\2e scss:1:1\\a File to import not found or unreadable: missing\\2e scss\\a Parent style sheet: \\2f Users\\2f munter\\2f git\\2f express\\2d compile\\2d sass\\2f test\\2f missingimport\\2f missingimport\\2e scss"')
       }
     })
     .then(function () {
