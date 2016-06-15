@@ -1,5 +1,5 @@
 /*global __dirname*/
-var _ = require('lodash'),
+var extend = require('extend'),
   express = require('express'),
   compileSass = require('../lib/index'),
   expect = require('unexpected'),
@@ -31,7 +31,7 @@ expect.addAssertion('<string> to contain an inline source map [exhaustively] sat
 function getApp(options) {
     var app = express();
 
-    app.use(compileSass(_.extend({
+    app.use(compileSass(extend({
         root: root,
         watchFiles: false,
         logToConsole: true
