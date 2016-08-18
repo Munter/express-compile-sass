@@ -31,7 +31,7 @@
     "extend": "^3.0.0",
     "fs-extra": "^0.30.0",
     "istanbul": "^0.4.3",
-    "jshint": "^2.5.6",
+    "jshint": "^2.9.3",
     "magicpen-media": "^1.5.0",
     "mensch": "^0.3.1",
     "messy": "^6.5.0",
