@@ -40,7 +40,7 @@
     "node-sass": "^3.1.2",
     "sinon": "^1.15.4",
     "supertest": "^1.2.0",
-    "unexpected": "^10.13.3",
+    "unexpected": "^10.22.2",
     "unexpected-express": "^8.2.0",
     "unexpected-messy": "^6.1.1",
     "unexpected-sinon": "^10.2.1"
