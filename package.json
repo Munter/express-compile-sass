@@ -36,7 +36,7 @@
     "mensch": "^0.3.1",
     "messy": "^6.5.0",
     "mocha": "^2.5.3",
-    "mocha-lcov-reporter": "^1.2.0",
+    "mocha-lcov-reporter": "^1.3.0",
     "node-sass": "^3.1.2",
     "sinon": "^1.15.4",
     "supertest": "^1.2.0",
