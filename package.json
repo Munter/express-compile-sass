@@ -27,7 +27,7 @@
   },
   "devDependencies": {
     "coveralls": "^2.11.2",
-    "express": "^4.13.1",
+    "express": "^4.15.0",
     "extend": "^3.0.0",
     "fs-extra": "^0.30.0",
     "istanbul": "^0.4.3",
