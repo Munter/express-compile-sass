@@ -156,7 +156,7 @@ describe('compile-sass', function () {
         headers: {
           'Content-Type': 'text/css; charset=UTF-8'
         },
-        body: expect.it('to contain', 'content: "express\\2d compile\\2d sass:\\a   Syntax error in \\2f missingimport\\2f missingimport\\2e scss:1:1\\a File to import not found or unreadable: missing\\2e scss\\a Parent style sheet: \\2f Users\\2f munter\\2f git\\2f express\\2d compile\\2d sass\\2f test\\2f missingimport\\2f missingimport\\2e scss"')
+        body: expect.it('to contain', 'content: "express\\2d compile\\2d sass:\\a   Syntax error in \\2f missingimport\\2f missingimport\\2e scss:1:1\\a File to import not found or unreadable: missing\\2e scss')
       }
     })
     .then(function () {
