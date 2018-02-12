@@ -11,11 +11,13 @@ describe('File watching', function () {
     it('should serve files fast when not watching files', function () {
         var start = Date.now();
 
-        return expect(compileSass({
+        var middleware = compileSass({
             root: root,
             watchFiles: false,
             logToConsole: false
-        }), 'to yield exchange', {
+        });
+
+        return expect(middleware, 'to yield exchange', {
             request: '/manyfiles/main.scss'
         })
         .then(function () {
@@ -26,14 +28,17 @@ describe('File watching', function () {
     it('should serve files fast when watching files', function () {
         var start = Date.now();
 
-        return expect(compileSass({
+        var middleware = compileSass({
             root: root,
             watchFiles: true,
             logToConsole: false
-        }), 'to yield exchange', {
+        });
+
+        return expect(middleware, 'to yield exchange', {
             request: '/manyfiles/main.scss'
         })
         .then(function () {
+            middleware.close();
             expect(Date.now() - start, 'to be less than', 1100);
         });
     });

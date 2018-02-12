@@ -33,13 +33,17 @@ expect.addAssertion('<string> to contain an inline source map [exhaustively] sat
 function getApp(options) {
     var app = express();
 
-    app.use(compileSass(extend({
+    var middleware = compileSass(extend({
         root: root,
         watchFiles: false,
         logToConsole: true
-    }, options)));
+    }, options));
+
+    app.use(middleware);
 
     app.use(express.static(root));
+
+    app.close = middleware.close;
 
     return app;
 }
@@ -221,7 +225,8 @@ describe('compile-sass', function () {
           },
           response: 200
         });
-      });
+      })
+      .finally(app.close);
     });
 
     it('should return a 304 status code if ETag matches', function () {
@@ -244,7 +249,8 @@ describe('compile-sass', function () {
           },
           response: 304
         });
-      });
+      })
+      .finally(app.close);
     });
 
     describe('then updating a watched file', function () {
@@ -277,7 +283,8 @@ describe('compile-sass', function () {
             },
             response: 200
           });
-        });
+        })
+        .finally(app.close);
       });
 
       it('should recompile and return 200 when atomically updating the main file', function () {
@@ -310,7 +317,8 @@ describe('compile-sass', function () {
             },
             response: 200
           });
-        });
+        })
+        .finally(app.close);
       });
 
       it('should recompile and return 200 when updating a dependency', function () {
@@ -342,7 +350,8 @@ describe('compile-sass', function () {
             },
             response: 200
           });
-        });
+        })
+        .finally(app.close);
       });
 
       it('should recompile and return 200 when atomically updating a dependency', function () {
@@ -375,8 +384,8 @@ describe('compile-sass', function () {
             },
             response: 200
           });
-        });
-
+        })
+        .finally(app.close);
       });
     });
   });

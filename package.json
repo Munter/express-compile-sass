@@ -35,18 +35,18 @@
     "magicpen-media": "^1.5.0",
     "mensch": "^0.3.1",
     "messy": "^6.5.0",
-    "mocha": "^2.5.3",
+    "mocha": "^5.0.0",
     "mocha-lcov-reporter": "^1.2.0",
     "node-sass": "^4.7.2",
-    "sinon": "^1.15.4",
+    "sinon": "^4.3.0",
     "unexpected": "^10.37.1",
     "unexpected-express": "^10.0.0",
     "unexpected-sinon": "^10.2.1"
   },
   "dependencies": {
     "chalk": "^1.0.0",
+    "chokidar": "^2.0.1",
     "csserror": "^2.0.2",
-    "gaze": "^1.0.0",
     "inline-source-map-comment": "^1.0.5"
   }
 }
