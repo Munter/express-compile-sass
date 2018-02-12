@@ -44,7 +44,7 @@
     "unexpected-sinon": "^10.2.1"
   },
   "dependencies": {
-    "chalk": "^1.0.0",
+    "chalk": "^2.3.1",
     "chokidar": "^2.0.1",
     "csserror": "^2.0.2",
     "inline-source-map-comment": "^1.0.5"
