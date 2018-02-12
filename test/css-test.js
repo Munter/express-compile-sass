@@ -1,14 +1,16 @@
 /*global __dirname*/
-var extend = require('extend'),
-  express = require('express'),
-  compileSass = require('../lib/index'),
-  expect = require('unexpected'),
-  sinon = require('sinon'),
-  fs = require('fs-extra'),
-  root = __dirname;
+var extend = require('extend');
+var express = require('express');
+var compileSass = require('../lib/index');
+var sinon = require('sinon');
+var fs = require('fs-extra');
 
-expect.installPlugin(require('unexpected-sinon'));
-expect.installPlugin(require('unexpected-express'));
+var expect = require('unexpected')
+  .clone()
+  .use(require('unexpected-sinon'))
+  .use(require('unexpected-express'));
+
+var root = __dirname;
 
 // Css custom assertion
 var mensch = require('mensch');

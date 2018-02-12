@@ -1,47 +1,40 @@
 /*global __dirname*/
-var express = require('express'),
-    request = require('supertest'),
-    compileSass = require('../lib/index'),
-    expect = require('unexpected'),
-    root = __dirname;
+var compileSass = require('../lib/index');
+var expect = require('unexpected')
+  .clone()
+  .use(require('unexpected-express'));
+
+var root = __dirname;
 
 describe('File watching', function () {
 
-    it('should serve files fast when not watching files', function (done) {
-        var app = express();
+    it('should serve files fast when not watching files', function () {
+        var start = Date.now();
 
-        app.use(compileSass({
+        return expect(compileSass({
             root: root,
             watchFiles: false,
             logToConsole: false
-        }));
-
-        var start = Date.now();
-
-        request(app)
-            .get('/manyfiles/main.scss')
-            .end(function () {
-                expect(Date.now() - start, 'to be less than', 200);
-                done();
-            });
+        }), 'to yield exchange', {
+            request: '/manyfiles/main.scss'
+        })
+        .then(function () {
+            expect(Date.now() - start, 'to be less than', 200);
+        });
     });
 
-    it('should serve files fast when watching files', function (done) {
-        var app = express();
+    it('should serve files fast when watching files', function () {
+        var start = Date.now();
 
-        app.use(compileSass({
+        return expect(compileSass({
             root: root,
             watchFiles: true,
             logToConsole: false
-        }));
-
-        var start = Date.now();
-
-        request(app)
-            .get('/manyfiles/main.scss')
-            .end(function () {
-                expect(Date.now() - start, 'to be less than', 1100);
-                done();
-            });
+        }), 'to yield exchange', {
+            request: '/manyfiles/main.scss'
+        })
+        .then(function () {
+            expect(Date.now() - start, 'to be less than', 1100);
+        });
     });
 });
