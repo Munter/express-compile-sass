@@ -39,9 +39,8 @@
     "mocha-lcov-reporter": "^1.2.0",
     "node-sass": "^4.7.2",
     "sinon": "^1.15.4",
-    "unexpected": "^10.13.3",
-    "unexpected-express": "^8.2.0",
-    "unexpected-messy": "^6.1.1",
+    "unexpected": "^10.37.1",
+    "unexpected-express": "^10.0.0",
     "unexpected-sinon": "^10.2.1"
   },
   "dependencies": {
