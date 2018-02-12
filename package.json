@@ -37,7 +37,7 @@
     "messy": "^6.5.0",
     "mocha": "^2.5.3",
     "mocha-lcov-reporter": "^1.2.0",
-    "node-sass": "^3.1.2",
+    "node-sass": "^4.7.2",
     "sinon": "^1.15.4",
     "supertest": "^1.2.0",
     "unexpected": "^10.13.3",
@@ -49,7 +49,6 @@
     "chalk": "^1.0.0",
     "csserror": "^2.0.2",
     "gaze": "^1.0.0",
-    "inline-source-map-comment": "^1.0.5",
-    "node-sass-evergreen": "^1.1.2"
+    "inline-source-map-comment": "^1.0.5"
   }
 }
