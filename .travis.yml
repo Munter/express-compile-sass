@@ -1,8 +1,10 @@
-language: node_js
-sudo: false
-cache: false
+anguage: node_js
 node_js:
-  - "0.10"
-  - "0.12"
+  - "4"
+  - "6"
+  - "7"
+  - "8"
+env:
+  - CXX=g++-4.8
 script: "npm run-script travis"
 after_success: "<coverage/lcov.info ./node_modules/coveralls/bin/coveralls.js"
