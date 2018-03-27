@@ -1,6 +1,7 @@
 /*global __dirname*/
 var extend = require('extend');
-var express = require('express');
+var Koa = require('koa');
+var static = require('koa-static');
 var compileSass = require('../lib/index');
 var sinon = require('sinon');
 var fs = require('fs-extra');
@@ -8,7 +9,7 @@ var fs = require('fs-extra');
 var expect = require('unexpected')
   .clone()
   .use(require('unexpected-sinon'))
-  .use(require('unexpected-express'));
+  .use(require('unexpected-koa'));
 
 var root = __dirname;
 
@@ -31,7 +32,7 @@ expect.addAssertion('<string> to contain an inline source map [exhaustively] sat
 
 
 function getApp(options) {
-    var app = express();
+    var app = new Koa();
 
     var middleware = compileSass(extend({
         root: root,
@@ -41,7 +42,7 @@ function getApp(options) {
 
     app.use(middleware);
 
-    app.use(express.static(root));
+    app.use(static(root));
 
     app.close = middleware.close;
 
@@ -69,7 +70,7 @@ describe('compile-sass', function () {
       response: {
         statusCode: 200,
         headers: {
-          'Content-Type': 'text/css; charset=UTF-8'
+          'Content-Type': 'text/css; charset=utf-8'
         },
         body: expect.it('to contain the same CSS as', 'body{ color: red;}')
       }
@@ -89,7 +90,7 @@ describe('compile-sass', function () {
       response: {
         statusCode: 200,
         headers: {
-          'Content-Type': 'text/css; charset=UTF-8'
+          'Content-Type': 'text/css; charset=utf-8'
         },
         body: expect.it('to contain the same CSS as', 'body h1 { color: red; }')
       }
@@ -112,7 +113,7 @@ describe('compile-sass', function () {
       response: {
         statusCode: 200,
         headers: {
-          'Content-Type': 'text/css; charset=UTF-8'
+          'Content-Type': 'text/css; charset=utf-8'
         },
         body: expect.it('to contain the same CSS as', 'body h1 { color: red; }')
           .and('to contain an inline source map satisfying', {
@@ -130,7 +131,7 @@ describe('compile-sass', function () {
   });
 
   it('should serve an error stylesheet when the SCSS has a syntax error', function () {
-    var stub = sinon.stub(console, 'log');
+    var stub = sinon.spy(console, 'log');
 
     return expect(getApp(), 'to yield exchange', {
       request: {
@@ -139,7 +140,7 @@ describe('compile-sass', function () {
       response: {
         statusCode: 200,
         headers: {
-          'Content-Type': 'text/css; charset=UTF-8'
+          'Content-Type': 'text/css; charset=utf-8'
         },
         body: expect.it('to contain', 'content: "express\\2d compile\\2d sass:\\a   Syntax error in \\2f scss\\2f syntaxerror\\2e scss:2:5\\a property \\22 color\\22  must be followed by a \\27 :\\27 "')
       }
@@ -160,7 +161,7 @@ describe('compile-sass', function () {
       response: {
         statusCode: 200,
         headers: {
-          'Content-Type': 'text/css; charset=UTF-8'
+          'Content-Type': 'text/css; charset=utf-8'
         },
         body: expect.it('to contain', 'content: "express\\2d compile\\2d sass:\\a   Syntax error in \\2f missingimport\\2f missingimport\\2e scss:1:1\\a File to import not found or unreadable: missing\\2e scss')
       }
@@ -182,7 +183,7 @@ describe('compile-sass', function () {
       response: {
         statusCode: 200,
         headers: {
-          'Content-Type': 'text/css; charset=UTF-8'
+          'Content-Type': 'text/css; charset=utf-8'
         },
         body: expect.it('to match', /^body h1 {\n  color: red; }\n/)
       }
@@ -200,7 +201,7 @@ describe('compile-sass', function () {
       response: {
         statusCode: 200,
         headers: {
-          'Content-Type': 'text/css; charset=UTF-8'
+          'Content-Type': 'text/css; charset=utf-8'
         },
         body: expect.it('to match', /^\/\* line 1, .*?\/scss\/a\.scss \*\/\nbody h1 {\n  color: red; }\n/)
       }
@@ -211,14 +212,14 @@ describe('compile-sass', function () {
     it('should return a 200 status code if ETag does not match', function () {
       var app = getApp({
         watchFiles: true,
-        logToConsole: false
+        logToConsole: true
       });
 
       return expect(app, 'to yield exchange', {
         request: 'GET /scss/a.scss',
         response: 200
       })
-      .then(function () {
+      .then(function (context) {
         return expect(app, 'to yield exchange', {
           request: {
             url: '/scss/a.scss'
@@ -232,7 +233,7 @@ describe('compile-sass', function () {
     it('should return a 304 status code if ETag matches', function () {
       var app = getApp({
         watchFiles: true,
-        logToConsole: false
+        logToConsole: true
       });
 
       return expect(app, 'to yield exchange', {
@@ -240,11 +241,12 @@ describe('compile-sass', function () {
         response: 200
       })
       .then(function (context) {
+        console.log('etag match', context.httpResponse.headers.get('etag'));
         return expect(app, 'to yield exchange', {
           request: {
             url: '/scss/a.scss',
             headers: {
-              'If-None-Match': context.res.get('etag')
+              'If-None-Match': context.httpResponse.headers.get('etag')
             }
           },
           response: 304
@@ -278,7 +280,7 @@ describe('compile-sass', function () {
             request: {
               url: '/import-main/main.scss',
               headers: {
-                'If-None-Match': context.res.get('etag')
+                'If-None-Match': context.httpResponse.headers.get('etag')
               }
             },
             response: 200
@@ -312,7 +314,7 @@ describe('compile-sass', function () {
             request: {
               url: '/import-main-atomic/main.scss',
               headers: {
-                'If-None-Match': context.res.get('etag')
+                'If-None-Match': context.httpResponse.headers.get('etag')
               }
             },
             response: 200
@@ -345,7 +347,7 @@ describe('compile-sass', function () {
             request: {
               url: '/import-import/main.scss',
               headers: {
-                'If-None-Match': context.res.get('etag')
+                'If-None-Match': context.httpResponse.headers.get('etag')
               }
             },
             response: 200
@@ -379,7 +381,7 @@ describe('compile-sass', function () {
             request: {
               url: '/import-import-atomic/main.scss',
               headers: {
-                'If-None-Match': context.res.get('etag')
+                'If-None-Match': context.httpResponse.headers.get('etag')
               }
             },
             response: 200
@@ -426,7 +428,7 @@ describe('compile-sass', function () {
           request: {
             url: '/scss/a.scss',
             headers: {
-              'If-None-Match': context.res.get('etag')
+              'If-None-Match': context.httpResponse.headers.get('etag')
             }
           },
           response: 200
