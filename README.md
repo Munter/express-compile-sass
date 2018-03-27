@@ -1,6 +1,6 @@
 Koa-compile-sass
 ====================
-<!-- [![NPM version](https://badge.fury.io/js/express-compile-sass.svg)](http://badge.fury.io/js/express-compile-sass) -->
+[![NPM version](https://badge.fury.io/js/koa-compile-sass.svg)](http://badge.fury.io/js/koa-compile-sass)
 [![Build Status](https://travis-ci.org/swist/koa-compile-sass.svg?branch=master)](https://travis-ci.org/swist/koa-compile-sass)
 [![Coverage Status](https://coveralls.io/repos/github/swist/koa-compile-sass/badge.svg?branch=master)](https://coveralls.io/github/swist/koa-compile-sass?branch=master)
 <!-- [![Dependency Status](https://david-dm.org/Munter/express-compile-sass.svg)](https://david-dm.org/Munter/express-compile-sass) -->
