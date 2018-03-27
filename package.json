@@ -1,6 +1,6 @@
 {
   "name": "koa-compile-sass",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Koa middleware to compile sass in the HTTP stream",
   "files": [
     "lib/index.js"
