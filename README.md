@@ -1,12 +1,11 @@
-Express-compile-sass
+Koa-compile-sass
 ====================
-[![NPM version](https://badge.fury.io/js/express-compile-sass.svg)](http://badge.fury.io/js/express-compile-sass)
-[![Build Status](https://travis-ci.org/Munter/express-compile-sass.svg?branch=master)](https://travis-ci.org/Munter/express-compile-sass)
-[![Coverage Status](https://coveralls.io/repos/Munter/express-compile-sass/badge.svg?branch=master)](https://coveralls.io/r/Munter/express-compile-sass?branch=master)
-[![Dependency Status](https://david-dm.org/Munter/express-compile-sass.svg)](https://david-dm.org/Munter/express-compile-sass)
+[![NPM version](https://badge.fury.io/js/koa-compile-sass.svg)](http://badge.fury.io/js/koa-compile-sass)
+[![Build Status](https://travis-ci.org/swist/koa-compile-sass.svg?branch=master)](https://travis-ci.org/swist/koa-compile-sass)
+[![Coverage Status](https://coveralls.io/repos/github/swist/koa-compile-sass/badge.svg?branch=master)](https://coveralls.io/github/swist/koa-compile-sass?branch=master)
+<!-- [![Dependency Status](https://david-dm.org/Munter/express-compile-sass.svg)](https://david-dm.org/Munter/express-compile-sass) -->
 
-
-Express middleware that will compile any `.scss` or `.sass` files in the response stream and deliver the resulting CSS.
+Koa middleware that will compile any `.scss` or `.sass` files in the response stream and deliver the resulting CSS.
 If syntax errors are encountered an error will be displayed very prominently in the browser, giving useful feedback on where to fix the problem.
 
 This module requires node-sass to run, but it will only look for it when it actually encounters a file that needs to be compiled for the first time.
@@ -19,8 +18,9 @@ The module will attempt to leverage both browser and server in-memory cache in o
 Middleware Usage
 ----------------
 ``` javascript
-var express = require('express'),
-    app = express(),
+var Koa = require('koa'),
+    static = require('koa-static'),
+    app = new Koa(),
     compileSass = require('express-compile-sass'),
     root = process.cwd();
 
@@ -31,7 +31,7 @@ app.use(compileSass({
     watchFiles: true, // Watches sass files and updates mtime on main files for each change
     logToConsole: false // If true, will log to console.error on errors
 });
-app.use(express.static(root));
+app.use(static(root));
 
 app.listen(5000);
 console.log('Listening on port: 5000');
@@ -46,15 +46,8 @@ Browser Usage
 Changelog
 ---------
 
-**3.x**:
- - Switched from importing node-sass directly. Now uses [node-sass-evergreen](https://github.com/Munter/node-sass-evergreen) to have more features and better backwards compatibility with older node versions
- - `options.sourceMap` now correctly includes source maps instead of soruce comments
- - `options.sourceComments` now adds source comments to output
-
-**2.x**:
- - Removed the strict typing and stopped looking at Accept-headers. Now matches files with extensions `.scss` and `.sass`.
- - No longer pass the request down the chain with [express-hijackresponse](https://github.com/papandreou/express-hijackresponse). The only reason for it was possible non-filesystem proxy mappings, which would not work with the sass compilers `@import` statements anyway.
- - Cache etag and response body to reduce sass compiling workload. File watch callbacks act as cache busters.
+**1.x**:
+Ported express compile sass to work with koa
 
 
 License

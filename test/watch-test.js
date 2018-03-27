@@ -2,7 +2,7 @@
 var compileSass = require('../lib/index');
 var expect = require('unexpected')
   .clone()
-  .use(require('unexpected-express'));
+  .use(require('unexpected-koa'));
 
 var root = __dirname;
 

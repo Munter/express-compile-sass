@@ -1,21 +1,7 @@
 {
-  "name": "express-compile-sass",
-  "author": "Peter Müller <munter@fumle.dk>",
-  "license": "MIT",
-  "version": "4.0.0",
-  "description": "Express middleware that compiles sass to css using the locally installed node-sass",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/Munter/express-compile-sass.git"
-  },
-  "keywords": [
-    "express",
-    "sass",
-    "css"
-  ],
-  "homepage": "https://github.com/Munter/express-compile-sass",
-  "bugs": "https://github.com/Munter/express-compile-sass/issues",
-  "main": "lib/index.js",
+  "name": "koa-compile-sass",
+  "version": "1.0.1",
+  "description": "Koa middleware to compile sass in the HTTP stream",
   "files": [
     "lib/index.js"
   ],
@@ -25,13 +11,33 @@
     "travis": "npm run lint && npm run coverage",
     "coverage": "istanbul cover _mocha"
   },
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/swist/koa-compile-sass.git"
+  },
+  "keywords": [
+    "koa",
+    "sass",
+    "css"
+  ],
+  "author": "Tomasz Nguyen",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/swist/koa-compile-sass/issues"
+  },
+  "homepage": "https://github.com/swist/koa-compile-sass#readme",
   "devDependencies": {
     "coveralls": "^3.0.0",
-    "express": "^4.13.1",
     "extend": "^3.0.0",
     "fs-extra": "^5.0.0",
     "istanbul": "^0.4.3",
     "jshint": "^2.5.6",
+    "koa": "^2.5.0",
+    "koa-static": "^4.0.2",
     "magicpen-media": "^1.5.0",
     "mensch": "^0.3.1",
     "messy": "^6.5.0",
@@ -40,7 +46,7 @@
     "node-sass": "^4.7.2",
     "sinon": "^4.3.0",
     "unexpected": "^10.37.1",
-    "unexpected-express": "^10.0.0",
+    "unexpected-koa": "^1.0.0",
     "unexpected-sinon": "^10.2.1"
   },
   "dependencies": {
